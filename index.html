@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>달력</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <!-- 배치: PC에서는 왼쪽에 D-day·범례·백업, 오른쪽에 달력과 그 아래 시간표
+               중간 폭에서는 D-day → 달력 → 시간표 아래에 범례와 백업을 좌우로
+               휴대폰에서는 위에서부터 D-day → 달력 → 시간표 → 범례 → 백업 (이 파일에 적힌 순서) -->
+    <main class="layout">
+      <!-- D-day 목록 -->
+      <section class="panel dday-panel" aria-labelledby="ddayTitle">
+        <div class="panel-header">
+          <h2 id="ddayTitle" class="panel-title">D-day</h2>
+          <select id="ddaySort" class="sort-select" aria-label="D-day 정렬 방법">
+            <option value="added">설정한 순서</option>
+            <option value="asc">날짜 순</option>
+            <option value="desc">날짜 역순</option>
+          </select>
+        </div>
+        <ul id="ddayList" class="dday-list"></ul>
+        <p id="ddayEmpty" class="empty-text small">날짜를 눌러 일정 옆의 <b>D-day</b> 버튼을 누르면 여기에 표시돼요.</p>
+      </section>
+
+      <!-- 오른쪽 열: 달력과 시간표를 한 묶음으로 (왼쪽 패널 높이와 상관없이 바로 붙어 있도록) -->
+      <div class="main-col">
+      <!-- 달력 영역 -->
+      <section class="calendar-panel" aria-label="월간 달력">
+        <!-- 달 이동 버튼, 연/월 입력칸, 오늘 버튼, 라이트/다크 모드 버튼 -->
+        <div class="cal-header">
+          <div class="month-nav">
+            <button id="prevMonth" class="icon-btn" type="button" aria-label="이전 달" title="이전 달">‹</button>
+            <!-- 연도와 월은 숫자를 직접 입력할 수 있어요 (입력 후 Enter 또는 다른 곳 클릭) -->
+            <div class="month-title">
+              <input id="yearInput" class="date-input year-input" type="number" min="1900" max="2100" inputmode="numeric" aria-label="연도" title="연도를 입력하세요">
+              <span>년</span>
+              <input id="monthInput" class="date-input month-input" type="number" min="1" max="12" inputmode="numeric" aria-label="월" title="월을 입력하세요">
+              <span>월</span>
+            </div>
+            <button id="nextMonth" class="icon-btn" type="button" aria-label="다음 달" title="다음 달">›</button>
+          </div>
+          <!-- 오늘 날짜·요일 + 현재 시각 (예: 2026년 10월 31일 토요일 19:02)
+               자리가 모자라면 연도 → 월 → 요일 → 일 순서로 숨기고, 시각은 항상 보여요 -->
+          <div id="now" class="now">
+            <span id="todayDate" class="today-date"></span>
+            <!-- 현재 시각 (24시간제 시:분). 마우스를 올리면(휴대폰은 누르면) 커지면서 초도 보여요 -->
+            <time id="clock" class="clock" tabindex="0" title="현재 시각"><span id="clockHM"></span><span id="clockSec" class="clock-sec"></span></time>
+          </div>
+          <div class="cal-actions">
+            <button id="todayBtn" class="text-btn" type="button">오늘</button>
+            <button id="themeToggle" class="icon-btn" type="button" aria-label="다크 모드로 전환" title="다크 모드로 전환"></button>
+          </div>
+        </div>
+
+        <!-- 요일 이름 줄 (일요일부터 시작) -->
+        <div class="weekdays" aria-hidden="true">
+          <div class="sun">일</div>
+          <div>월</div>
+          <div>화</div>
+          <div>수</div>
+          <div>목</div>
+          <div>금</div>
+          <div class="sat">토</div>
+        </div>
+
+        <!-- 날짜 칸들은 app.js가 여기에 만들어 넣습니다 -->
+        <div id="calendarGrid" class="calendar-grid"></div>
+      </section>
+
+      <!-- 시간표: 표는 app.js가 만들어 넣어요 -->
+      <section id="timetablePanel" class="panel timetable-panel" aria-labelledby="timetableTitle">
+        <div class="panel-header">
+          <h2 id="timetableTitle" class="panel-title">시간표</h2>
+          <div class="timetable-actions">
+            <button id="timetableClear" class="small-btn danger" type="button">전체 비우기</button>
+            <button id="timetableEdit" class="small-btn" type="button">수정</button>
+          </div>
+        </div>
+        <p id="timetableHint" class="empty-text small timetable-hint">칸을 눌러 과목을 고르세요.</p>
+        <div id="timetableEmpty" class="timetable-empty">
+          <p class="empty-text">아직 시간표가 없어요.</p>
+          <button id="timetableRegister" class="primary-btn" type="button">시간표 등록</button>
+        </div>
+        <table id="timetableTable" class="timetable"></table>
+      </section>
+      </div>
+
+      <!-- 범례 -->
+      <section class="panel legend-panel" aria-label="범례">
+        <h3 class="legend-heading">일정 종류</h3>
+        <ul id="legendTypes" class="legend-list"></ul>
+        <h3 class="legend-heading">과목</h3>
+        <!-- 과목마다: [⋮⋮ 끌어서 순서 바꾸기] [색] [이름] [수정] -->
+        <ul id="legendSubjects" class="legend-list subject-list"></ul>
+        <p id="subjectEmpty" class="empty-text small">아직 과목이 없어요. 듣는 과목을 추가해 보세요.</p>
+        <button id="addSubjectBtn" class="text-btn add-subject-btn" type="button">+ 과목 추가</button>
+      </section>
+
+      <!-- 백업: 일정을 JSON 파일로 내보내기/가져오기 -->
+      <section class="panel backup-panel" aria-labelledby="backupTitle">
+        <h2 id="backupTitle" class="panel-title">백업</h2>
+        <p class="backup-hint">일정은 이 브라우저에만 저장돼요. 다른 컴퓨터로 옮기거나 백업하려면 파일로 내보내세요.</p>
+        <div class="backup-actions">
+          <button id="exportBtn" class="text-btn" type="button">내보내기</button>
+          <button id="importBtn" class="text-btn" type="button">가져오기</button>
+        </div>
+        <!-- 파일 고르는 창을 띄우기 위한 숨은 입력칸 ('가져오기' 버튼이 대신 눌러 줘요) -->
+        <input id="importFile" type="file" accept=".json,application/json" hidden>
+      </section>
+    </main>
+  </div>
+
+  <!-- 일정 삭제 후 약 5초 동안 뜨는 되돌리기 알림
+       (일정 창이 열려 있으면 그 바깥은 눌리지 않아서, app.js가 일정 창 안으로 옮겨 줘요) -->
+  <div id="undoToast" class="undo-toast" role="status" hidden>
+    <span>일정을 삭제했어요 ·</span>
+    <button id="undoBtn" class="undo-btn" type="button">되돌리기</button>
+  </div>
+
+  <!-- 날짜를 눌렀을 때 뜨는 창: 그날의 일정 목록
+       창 양옆의 화살표(또는 키보드 ← →)로 전날/다음날로 넘어갈 수 있어요 -->
+  <dialog id="dayDialog" class="dialog day-dialog" aria-labelledby="dayDialogTitle">
+    <button id="dayPrev" class="icon-btn day-nav" type="button" aria-label="전날" title="전날 (←)">‹</button>
+    <div class="dialog-inner day-card">
+      <div class="dialog-header">
+        <div>
+          <h2 id="dayDialogTitle" class="dialog-title"></h2>
+          <p id="dayDialogHoliday" class="dialog-holiday"></p>
+        </div>
+        <button id="dayDialogClose" class="icon-btn" type="button" aria-label="닫기" title="닫기">×</button>
+      </div>
+      <!-- 기간 일정은 위에 고정 (끌어서 순서를 바꾸지 않아요), 그 아래에 하루 일정 -->
+      <ul id="dayRangeList" class="day-event-list"></ul>
+      <ul id="dayEventList" class="day-event-list"></ul>
+      <p id="dayEmpty" class="empty-text">등록된 일정이 없어요.</p>
+      <button id="addEventBtn" class="primary-btn full" type="button" autofocus>+ 일정 추가</button>
+    </div>
+    <button id="dayNext" class="icon-btn day-nav" type="button" aria-label="다음날" title="다음날 (→)">›</button>
+  </dialog>
+
+  <!-- 일정 추가/수정 창 -->
+  <dialog id="eventDialog" class="dialog" aria-labelledby="eventDialogTitle">
+    <form id="eventForm" class="dialog-inner" novalidate>
+      <div class="dialog-header">
+        <h2 id="eventDialogTitle" class="dialog-title">일정 추가</h2>
+      </div>
+
+      <label class="field">
+        <span id="eventDateLabel" class="field-label">날짜</span>
+        <input id="eventDate" type="date" required>
+      </label>
+
+      <!-- 여러 날에 걸친 일정 (시험 기간, 수학여행, 방학 등) -->
+      <label id="eventRangeField" class="check-field">
+        <input id="eventRangeToggle" type="checkbox">
+        <span>기간</span>
+      </label>
+      <label id="eventEndField" class="field">
+        <span class="field-label">종료일</span>
+        <input id="eventEndDate" type="date">
+      </label>
+
+      <fieldset class="field">
+        <legend class="field-label">종류</legend>
+        <!-- 종류 버튼은 config.js의 EVENT_TYPES를 보고 app.js가 만들어요 -->
+        <div id="eventTypeOptions" class="type-options"></div>
+      </fieldset>
+
+      <label id="subjectField" class="field">
+        <span class="field-label">과목</span>
+        <select id="eventSubject"></select>
+      </label>
+
+      <!-- 수행평가(요일마다 6~7교시)일 때만 보여요 (config.js의 EVENT_TYPES의 periods) -->
+      <label id="periodField" class="field">
+        <span class="field-label">교시</span>
+        <select id="eventPeriod"></select>
+      </label>
+      <!-- 수행평가 기간 일정은 교시를 고르는 대신 시간표에서 날마다 찾아 보여 줘요 -->
+      <p id="eventPeriodNote" class="field-note">교시는 시간표에서 날마다 표시돼요.</p>
+
+      <!-- 정기고사: 날짜별 1~3교시 과목 (평일만, 줄은 app.js가 만들어요) -->
+      <div id="examScheduleField" class="field">
+        <span class="field-label">시험 시간표</span>
+        <p class="field-note">아직 모르면 비워 두고 나중에 적어도 돼요.</p>
+        <div id="examScheduleRows" class="exam-rows"></div>
+      </div>
+
+      <label class="field">
+        <span class="field-label">내용</span>
+        <input id="eventTitle" type="text" maxlength="100" autocomplete="off">
+      </label>
+
+      <!-- 반복 일정: 수행평가·기타의 하루 일정에서만 보여요 -->
+      <div id="repeatField" class="field">
+        <span class="field-label">반복</span>
+        <div id="repeatFreq" class="type-options repeat-freq">
+          <label class="type-option"><input type="radio" name="repeatFreq" value="none" checked><span>반복 안 함</span></label>
+          <label class="type-option"><input type="radio" name="repeatFreq" value="weekly"><span>매주</span></label>
+          <label class="type-option"><input type="radio" name="repeatFreq" value="monthly"><span>매월</span></label>
+        </div>
+        <div id="repeatWeekdays" class="weekday-options">
+          <label class="weekday-option"><input type="checkbox" value="0"><span>일</span></label>
+          <label class="weekday-option"><input type="checkbox" value="1"><span>월</span></label>
+          <label class="weekday-option"><input type="checkbox" value="2"><span>화</span></label>
+          <label class="weekday-option"><input type="checkbox" value="3"><span>수</span></label>
+          <label class="weekday-option"><input type="checkbox" value="4"><span>목</span></label>
+          <label class="weekday-option"><input type="checkbox" value="5"><span>금</span></label>
+          <label class="weekday-option"><input type="checkbox" value="6"><span>토</span></label>
+        </div>
+        <label id="repeatUntilField" class="field">
+          <span class="field-label">반복 종료일</span>
+          <input id="repeatUntil" type="date">
+        </label>
+        <label id="repeatSkipField" class="check-field">
+          <input id="repeatSkipHolidays" type="checkbox">
+          <span>공휴일은 건너뛰기</span>
+        </label>
+      </div>
+
+      <!-- 시험 범위나 준비물을 적는 칸 (선택 사항) -->
+      <label class="field">
+        <span class="field-label">메모</span>
+        <textarea id="eventMemo" rows="3" maxlength="1000"></textarea>
+      </label>
+
+      <p id="formError" class="form-error" role="alert"></p>
+
+      <div class="dialog-actions">
+        <button id="eventCancel" class="text-btn" type="button">취소</button>
+        <button class="primary-btn" type="submit">저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 반복 일정을 수정·삭제할 때 범위를 고르는 창 -->
+  <dialog id="scopeDialog" class="dialog scope-dialog" aria-labelledby="scopeDialogTitle">
+    <div class="dialog-inner">
+      <h2 id="scopeDialogTitle" class="dialog-title"></h2>
+      <div class="scope-actions">
+        <button class="text-btn" type="button" data-scope="single">이 일정만</button>
+        <button class="text-btn" type="button" data-scope="from">이 일정과 이후 모두</button>
+        <button class="text-btn" type="button" data-scope="all">전체</button>
+        <button class="text-btn scope-cancel" type="button" data-scope="">취소</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- 과목 추가/수정 창 (범례의 '+ 과목 추가' 또는 과목 옆 '수정' 버튼으로 열려요) -->
+  <dialog id="subjectDialog" class="dialog" aria-labelledby="subjectDialogTitle">
+    <form id="subjectForm" class="dialog-inner" novalidate>
+      <div class="dialog-header">
+        <h2 id="subjectDialogTitle" class="dialog-title">과목 추가</h2>
+      </div>
+
+      <label class="field">
+        <span class="field-label">과목 이름</span>
+        <input id="subjectName" type="text" maxlength="20" autocomplete="off">
+      </label>
+
+      <div class="field">
+        <span class="field-label">과목 색</span>
+        <!-- 색 견본은 config.js의 SUBJECT_COLOR_PRESETS를 보고 app.js가 만들어요 -->
+        <div id="subjectColorOptions" class="color-options"></div>
+        <label class="color-custom">
+          <input id="subjectColor" type="color" value="#fab005">
+          <span>직접 고르기</span>
+        </label>
+      </div>
+
+      <p id="subjectError" class="form-error" role="alert"></p>
+
+      <div class="dialog-actions">
+        <button id="subjectDelete" class="text-btn danger-btn" type="button">과목 삭제</button>
+        <span class="spacer"></span>
+        <button id="subjectCancel" class="text-btn" type="button">취소</button>
+        <button class="primary-btn" type="submit">저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- 시간표 칸을 눌렀을 때 그 칸 근처에 뜨는 작은 선택 창 -->
+  <dialog id="ttPicker" class="dialog tt-picker" aria-labelledby="ttPickerTitle">
+    <div class="tt-picker-inner">
+      <h3 id="ttPickerTitle" class="tt-picker-title"></h3>
+      <ul id="ttPickerList" class="tt-picker-list"></ul>
+      <button id="ttPickerAddToggle" class="tt-option" type="button">+ 직접 추가</button>
+      <form id="ttPickerAddForm" class="tt-add-form" novalidate>
+        <input id="ttPickerAddName" type="text" maxlength="20" autocomplete="off" aria-label="직접 추가할 이름">
+        <button class="small-btn" type="submit">추가</button>
+      </form>
+      <p id="ttPickerError" class="form-error" role="alert"></p>
+      <button id="ttPickerClear" class="tt-option danger-btn" type="button">비우기</button>
+    </div>
+  </dialog>
+
+  <!-- 순서가 중요해요: 설정 → 공휴일 데이터 → 앱 동작 -->
+  <script src="config.js"></script>
+  <script src="holidays.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

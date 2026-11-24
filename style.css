@@ -1,0 +1,2169 @@
+/* =========================================================
+   색상 변수
+   - 라이트 모드가 기본값입니다.
+   - 사용자가 모드를 고르지 않았으면 시스템 설정(prefers-color-scheme)을 따르고,
+     직접 고르면 <html data-theme="light|dark"> 값이 우선합니다.
+   ========================================================= */
+:root {
+  /* 눈이 편하도록 순백색 대신 아주 옅은 아이보리 톤을 써요 */
+  --bg: #e9e6dc;            /* 페이지 배경 */
+  --surface: #f8f5ec;       /* 카드(달력 판) 배경 */
+  --surface-muted: #eeeae0; /* 다른 달 날짜, 지난 날짜 칸 배경 */
+  --border: #dedacd;        /* 칸 사이 선 */
+  --text: #1f2937;          /* 기본 글자 */
+  --text-muted: #9ca3af;    /* 흐린 글자 (지난 날짜 등) */
+  --sat: #2563eb;           /* 토요일 파란색 */
+  --sun: #dc2626;           /* 일요일·공휴일 빨간색 */
+  --sun-soft: #fdecec;      /* 빨간색 연한 바탕 (임박한 D-day) */
+  --accent: #4f46e5;        /* 오늘 강조색 */
+  --accent-text: #ffffff;   /* 강조색 위 글자 */
+  --hover: #ece8dc;         /* 버튼에 마우스를 올렸을 때 */
+  --today-soft: color-mix(in srgb, var(--accent) 13%, transparent); /* 시간표 오늘 요일 열의 연한 배경 */
+  --tt-tint: 22%;           /* 시간표 칸에 과목 색을 얼마나 진하게 섞을지 */
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(0, 0, 0, 0.04);
+  color-scheme: light;
+}
+
+/* 다크 모드 색상 (한 번만 정의해 두고 아래 두 곳에서 같이 씁니다) */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111318;
+    --surface: #1a1d24;
+    --surface-muted: #15171d;
+    --border: #2a2e37;
+    --text: #e5e7eb;
+    --text-muted: #6b7280;
+    --sat: #60a5fa;
+    --sun: #f87171;
+    --sun-soft: rgba(248, 113, 113, 0.14);
+    --accent: #818cf8;
+    --accent-text: #111318;
+    --hover: #242833;
+    --tt-tint: 30%;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111318;
+  --surface: #1a1d24;
+  --surface-muted: #15171d;
+  --border: #2a2e37;
+  --text: #e5e7eb;
+  --text-muted: #6b7280;
+  --sat: #60a5fa;
+  --sun: #f87171;
+  --sun-soft: rgba(248, 113, 113, 0.14);
+  --accent: #818cf8;
+  --accent-text: #111318;
+  --hover: #242833;
+  --tt-tint: 30%;
+  --shadow: none;
+  color-scheme: dark;
+}
+
+/* =========================================================
+   기본 설정
+   ========================================================= */
+* {
+  box-sizing: border-box;
+}
+
+/* hidden 속성이 붙은 요소는 어떤 스타일이 있어도 숨기기 */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕",
+    system-ui, -apple-system, sans-serif;
+  line-height: 1.4;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+
+/* 아이콘 버튼(‹ › 🌙) 공통 모양 */
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* 글자 버튼("오늘") 공통 모양 */
+.text-btn {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* 테마 버튼 안의 달/해 아이콘: 채우지 않고 윤곽선만 */
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon-btn:hover,
+.text-btn:hover {
+  background: var(--hover);
+}
+
+.icon-btn:focus-visible,
+.text-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 파란 바탕의 주요 버튼 ("일정 추가", "저장") */
+.primary-btn {
+  height: 38px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.primary-btn:hover {
+  filter: brightness(1.08);
+}
+
+.primary-btn.full {
+  width: 100%;
+}
+
+/* 일정 목록 안의 작은 버튼 ("수정", "삭제") */
+.small-btn {
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 0.8rem;
+}
+
+.small-btn:hover {
+  background: var(--hover);
+}
+
+.small-btn.danger {
+  color: var(--sun);
+}
+
+/* D-day 버튼이 켜져 있을 때: 강조색으로 칠하기 */
+.dday-toggle[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 600;
+}
+
+.dday-toggle[aria-pressed="true"]:hover {
+  background: var(--accent);
+  filter: brightness(1.08);
+}
+
+.primary-btn:focus-visible,
+.small-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   전체 배치
+   - PC: 왼쪽에 D-day·범례·백업, 오른쪽에 달력과 시간표 (.main-col로 묶음)
+         ┌────────┬──────────────┐
+         │ D-day  │     달력     │
+         ├────────┤              │
+         │ 범례   ├──────────────┤
+         ├────────┤    시간표    │
+         │ 백업   │              │
+         └────────┴──────────────┘
+   - 중간 폭(520~899px): D-day → 달력 → 시간표로 쌓고, 맨 아래에 범례와 백업을 좌우로 나란히
+   - 화면이 좁으면 한 줄로 쌓여요: D-day → 달력 → 시간표 → 범례 → 백업 (index.html에 적힌 순서)
+   ========================================================= */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+/* 520px보다 좁으면 범례 칸이 좁아져 긴 과목 이름이 잘려서 나란히 놓지 않아요 */
+@media (min-width: 520px) {
+  .layout {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "dday   dday"
+      "main   main"
+      "legend backup";
+  }
+
+  .backup-panel {
+    grid-area: backup;
+  }
+
+  .dday-panel {
+    grid-area: dday;
+  }
+
+  .main-col {
+    grid-area: main;
+  }
+
+  .legend-panel {
+    grid-area: legend;
+  }
+}
+
+@media (min-width: 900px) {
+  .layout {
+    grid-template-columns: 300px minmax(0, 1fr);
+    /* 마지막 줄(1fr)이 남는 높이를 가져가서 왼쪽 칸들 사이가 벌어지지 않아요 */
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas:
+      "dday   main"
+      "legend main"
+      "backup main";
+  }
+}
+
+/* 달력과 시간표 묶음 */
+.main-col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.calendar-panel,
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  padding: 16px;
+  min-width: 0; /* 칸 안의 긴 글자 때문에 달력이 넘치지 않게 */
+}
+
+/* =========================================================
+   달력 머리 부분 (이전/다음 달, 제목, 오늘 버튼)
+   ========================================================= */
+.cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap; /* 아주 좁은 화면에서는 버튼들이 다음 줄로 내려가요 */
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.month-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.month-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* 연도·월 입력칸: 평소엔 제목 글자처럼 보이고, 마우스를 올리거나 누르면 입력칸 티가 나요 */
+.date-input {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 2px 4px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  -moz-appearance: textfield; /* 파이어폭스에서 위/아래 화살표 숨기기 */
+  appearance: textfield;
+}
+
+/* 숫자 너비(ch)에 맞춰서 "2026년 10월" 글자 사이가 벌어지지 않게 */
+.year-input {
+  width: calc(4ch + 10px);
+}
+
+.month-input {
+  width: calc(2ch + 10px);
+}
+
+/* 크롬·엣지·사파리에서 숫자칸의 위/아래 화살표 숨기기 */
+.date-input::-webkit-outer-spin-button,
+.date-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.date-input:hover {
+  border-color: var(--border);
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--surface-muted);
+}
+
+.cal-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* =========================================================
+   오늘 날짜·요일 + 현재 시각 (연월과 오늘 버튼 사이의 빈 공간 가운데)
+   ========================================================= */
+
+.now {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 12px;
+  white-space: nowrap;
+}
+
+/* 오늘 날짜: 연월과 같은 크기·굵기, 연도·월·일·요일 사이는 한 칸씩 띄움 */
+.today-date {
+  display: inline-flex;
+  gap: 0.3em;
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 요일 색: 달력과 같게 (토요일 파랑, 일요일·공휴일 빨강) */
+.td-weekday.sat {
+  color: var(--sat);
+}
+
+.td-weekday.sun {
+  color: var(--sun);
+}
+
+/* 자리에 맞춰 보여 줄 단계 (app.js의 fitNow가 data-level을 정해요)
+   4: 연 월 일 요일 / 3: 월 일 요일 / 2: 일 요일 / 1: 일 / 0: 날짜 없이 시각만 */
+.now[data-level="3"] .td-year,
+.now[data-level="2"] .td-year,
+.now[data-level="2"] .td-month,
+.now[data-level="1"] .td-year,
+.now[data-level="1"] .td-month,
+.now[data-level="1"] .td-weekday,
+.now[data-level="0"] .today-date {
+  display: none;
+}
+
+.clock {
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums; /* 숫자가 바뀌어도 폭이 흔들리지 않게 */
+  color: var(--text-muted);
+  white-space: nowrap;
+  cursor: default;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+/* 초: 평소엔 폭 0으로 숨겨 두었다가 펼쳐져요 */
+.clock-sec {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  vertical-align: bottom;
+  opacity: 0;
+  transition: max-width 0.25s ease, opacity 0.25s ease;
+}
+
+/* 마우스를 올리거나(휴대폰은 눌러서 선택하면) 커지면서 초가 나타나요 */
+.clock:hover,
+.clock:focus-visible {
+  transform: scale(1.25);
+  color: var(--text);
+}
+
+.clock:hover .clock-sec,
+.clock:focus .clock-sec {
+  max-width: 3ch;
+  opacity: 1;
+}
+
+.clock:focus {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clock,
+  .clock-sec {
+    transition: none;
+  }
+}
+
+/* 폭이 좁은 휴대폰: 시계까지 한 줄에 들어가도록 버튼·글자를 조금씩 줄여요 */
+@media (max-width: 440px) {
+  .cal-header,
+  .cal-actions {
+    gap: 4px;
+  }
+
+  .month-nav {
+    gap: 2px;
+  }
+
+  .cal-header .icon-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .cal-header .text-btn {
+    height: 28px;
+    padding: 0 8px;
+    font-size: 0.8rem;
+  }
+
+  .month-title {
+    gap: 0;
+    font-size: 0.95rem;
+  }
+
+  .today-date {
+    font-size: 0.95rem; /* 연월과 같은 크기 */
+  }
+
+  .now {
+    gap: 6px;
+  }
+
+  .date-input {
+    padding: 2px 1px;
+  }
+
+  .year-input {
+    width: calc(4ch + 4px);
+  }
+
+  .month-input {
+    width: calc(2ch + 4px);
+  }
+
+  .clock {
+    font-size: 0.8rem;
+  }
+}
+
+/* 아주 좁은 화면(폭 350px 미만)에서는 자리가 없어서 시계를 숨겨요 */
+@media (max-width: 349px) {
+  .clock {
+    display: none;
+  }
+}
+
+/* =========================================================
+   요일 이름 줄
+   ========================================================= */
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding-bottom: 8px;
+}
+
+.weekdays .sun {
+  color: var(--sun);
+}
+
+.weekdays .sat {
+  color: var(--sat);
+}
+
+/* =========================================================
+   날짜 칸
+   ========================================================= */
+.calendar-grid {
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+  /* 끌어서 기간을 고를 때 글자가 파랗게 선택되지 않게 */
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* 한 주: 7칸짜리 격자. 줄 구성은 [날짜 숫자 자리] [일정 3줄] [남는 공간]
+   날짜 칸(.day)은 모든 줄을 차지하는 바탕이고, 일정은 그 위에 줄과 칸을 정해 얹어요.
+   그래서 기간 일정의 띠가 여러 칸에 걸쳐 이어질 수 있어요. */
+.week {
+  --day-top-h: 35px;
+  --item-gap: 6px;
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: var(--day-top-h) repeat(3, auto) 1fr;
+}
+
+.week .day {
+  grid-row: 1 / -1;
+}
+
+.week-item {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+  margin: 0 var(--item-gap) 2px;
+  cursor: pointer;
+}
+
+/* 지난 날짜·다른 달의 일정, 기간이 다 끝난 띠는 살짝 흐리게 */
+.week-item.dim {
+  opacity: 0.55;
+}
+
+/* 끌어서 기간을 고르는 중인 칸 */
+.day.selecting,
+.day.selecting:hover {
+  background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+/* 날짜 칸이 옆에서 들어오는 동안 달력 판 밖으로 삐져나와 보이지 않게 */
+.calendar-panel {
+  overflow-x: clip;
+}
+
+/* 달이 바뀔 때 날짜 칸들이 옆에서 부드럽게 밀려 들어오는 연출 */
+.calendar-grid.slide-next {
+  animation: slide-in-next 0.3s ease-out;
+}
+
+.calendar-grid.slide-prev {
+  animation: slide-in-prev 0.3s ease-out;
+}
+
+@keyframes slide-in-next {
+  from {
+    opacity: 0;
+    transform: translateX(40px); /* 오른쪽에서 */
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes slide-in-prev {
+  from {
+    opacity: 0;
+    transform: translateX(-40px); /* 왼쪽에서 */
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* 운영체제에서 '애니메이션 줄이기'를 켠 사람에게는 움직임 없이 바로 바뀌게 */
+@media (prefers-reduced-motion: reduce) {
+  .calendar-grid.slide-next,
+  .calendar-grid.slide-prev {
+    animation: none;
+  }
+}
+
+.day {
+  min-height: 104px;
+  padding: 6px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  min-width: 0;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.day:hover {
+  background: var(--hover);
+}
+
+.day:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* 날짜 숫자 */
+.day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 4px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 토요일 = 파랑, 일요일 = 빨강 */
+.day.sat .day-number {
+  color: var(--sat);
+}
+
+.day.sun .day-number,
+.day.holiday .day-number {
+  color: var(--sun);
+}
+
+/* 칸 맨 윗줄: 날짜 숫자 + 그 오른쪽의 공휴일 이름 */
+.day-top {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+/* 공휴일 이름: 작은 글씨, 칸이 좁으면 한 줄로 자르고 끝에 … 표시 */
+.holiday-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.66rem;
+  color: var(--sun);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.day.past .holiday-name {
+  color: var(--text-muted);
+}
+
+.day.other-month .holiday-name {
+  opacity: 0.45;
+}
+
+/* 지난 날짜: 회색 배경 + 글자를 흐리게 */
+.day.past {
+  background: var(--surface-muted);
+}
+
+.day.past .day-number {
+  color: var(--text-muted);
+}
+
+/* 이번 달이 아닌 앞뒤 달의 날짜: 더 흐리게 */
+.day.other-month .day-number {
+  opacity: 0.45;
+}
+
+/* 오늘: 강조색 동그라미 */
+.day.today .day-number {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+/* D-day 목록에서 눌러서 이동했을 때 해당 칸을 잠깐 반짝이기 */
+.day.flash {
+  animation: flash 1.6s ease-out;
+}
+
+@keyframes flash {
+  0%,
+  40% {
+    box-shadow: inset 0 0 0 2px var(--accent);
+    background: var(--hover);
+  }
+  100% {
+    box-shadow: inset 0 0 0 2px transparent;
+  }
+}
+
+/* =========================================================
+   일정 모양 표시 (config.js의 shape 값과 연결)
+   색은 app.js가 --event-color 변수로 넣어 줍니다.
+   ========================================================= */
+.marker {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  background: var(--event-color);
+}
+
+.marker-circle {
+  border-radius: 50%; /* 수행평가: 채워진 원 */
+}
+
+.marker-square {
+  border-radius: 1px; /* 시험: 채워진 사각형 */
+}
+
+.marker-ring {
+  border-radius: 50%; /* 기타: 테두리만 있는 원 */
+  background: transparent;
+  border: 2px solid var(--event-color);
+}
+
+.marker-bar {
+  width: 16px; /* 시험·학교 행사: 가로 막대 (범례·목록에서 쓰는 작은 막대) */
+  height: 6px;
+  border-radius: 3px;
+}
+
+.marker-dot {
+  width: 12px; /* 범례의 과목 색: 큰 동그라미 */
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* 목록에서 막대(16px)와 다른 모양(9px)의 글자 시작 위치를 맞추기 위한 여백 */
+#legendTypes .marker:not(.marker-bar),
+.day-event .marker:not(.marker-bar),
+.type-option .marker:not(.marker-bar) {
+  margin-inline: 3.5px;
+}
+
+/* =========================================================
+   달력 칸 안의 일정
+   ========================================================= */
+.event-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 1px 2px;
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.event-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.event-text b {
+  font-weight: 700;
+}
+
+/* 메모가 있는 일정의 작은 연필 아이콘: 제목이 잘려도 보이도록 오른쪽 끝에 고정 */
+.event-memo-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  margin-left: auto;
+  opacity: 0.75;
+}
+
+.event-memo-icon svg {
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* 시험·학교 행사는 칸 너비만큼 색칠된 막대 (글자색은 app.js가 바탕색에 맞춰 정해요) */
+.event-chip.shape-bar {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--event-color);
+}
+
+/* 정기고사 시험 막대: 과목 색으로 진하게 칠해서 연한 수행평가 띠와 구별돼요.
+   글자색은 app.js가 바탕색에 맞춰 정해요. */
+.exam-bar {
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--event-color);
+  font-weight: 700;
+}
+
+/* 시험이 없는 교시 줄: 높이만 차지해서 3교시가 셋째 줄에 있게 해요 */
+.exam-gap {
+  visibility: hidden;
+}
+
+/* 시험이 있는 날의 '+N개': 날짜 숫자 줄의 오른쪽 */
+.day-top .more-events {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+/* 기간 일정의 띠: 실제 시작일·종료일 쪽만 둥글고 칸 안쪽으로 들어와요.
+   주가 바뀌어 끊긴 쪽은 각지고 칸 끝까지 닿아서 이어진다는 걸 보여 줘요. */
+.band {
+  padding: 1px 5px;
+  margin-inline: 0;
+  border-radius: 0;
+}
+
+.band.round-start {
+  margin-left: var(--item-gap);
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.band.round-end {
+  margin-right: var(--item-gap);
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+/* 시험·학교 행사: 진하게 칠한 띠 (글자색은 app.js가 바탕색에 맞춰 정해요) */
+.band-solid {
+  background: var(--event-color);
+}
+
+/* 수행평가: 과목 색을 연하게 칠한 띠 */
+.band-soft {
+  background: color-mix(in srgb, var(--event-color) var(--tt-tint), transparent);
+  color: var(--text);
+}
+
+/* 기타: 테두리만 있는 띠 (끊긴 쪽은 테두리를 그리지 않아요) */
+.band-outline {
+  border: 1px solid var(--event-color);
+  color: var(--text);
+}
+
+.band-outline:not(.round-start) {
+  border-left: none;
+}
+
+.band-outline:not(.round-end) {
+  border-right: none;
+}
+
+/* 수행평가 띠: 날짜 칸마다 자리를 나눠 교시 숫자를 넣어요 */
+.band-daily {
+  display: grid;
+  gap: 0;
+  padding: 1px 0;
+}
+
+.band-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 첫 칸: 이름 [교시] (이름은 이 칸 폭에서 잘려요) */
+.band-slot-first {
+  justify-content: flex-start;
+  padding-left: 5px;
+  font-weight: 400;
+}
+
+/* 띠의 교시 상자: 이름 뒤에 붙고, 이름이 잘려도 줄어들지 않아요 */
+.band .bar-period {
+  flex-shrink: 0;
+  margin: 0 0 0 3px;
+}
+
+/* 이름 없이 숫자만 있는 칸에서는 가운데에 */
+.band-slot:not(.band-slot-first) .bar-period {
+  margin: 0;
+}
+
+.band-daily .event-memo-icon {
+  position: absolute;
+  top: 50%;
+  right: 3px;
+  margin: 0;
+  transform: translateY(-50%);
+}
+
+.more-events {
+  padding: 0 2px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* =========================================================
+   D-day·범례 패널 공통
+   ========================================================= */
+.panel {
+  min-width: 0;
+}
+
+/* 패널 제목 줄: 제목 + 오른쪽 정렬 선택 */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.panel-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.sort-select {
+  height: 30px;
+  padding: 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+}
+
+.sort-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* =========================================================
+   D-day 목록
+   ========================================================= */
+.dday-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dday-item {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* 줄 전체가 버튼 (누르면 그 달로 이동) */
+.dday-go {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 4px 8px 10px;
+  border: none;
+  background: transparent;
+  text-align: left;
+}
+
+.dday-go:hover,
+.dday-remove:hover {
+  background: var(--hover);
+}
+
+.dday-go:focus-visible,
+.dday-remove:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* 'D-5' 같은 숫자 표시 */
+.dday-badge {
+  flex-shrink: 0;
+  min-width: 56px;
+  padding: 3px 6px;
+  border-radius: 8px;
+  background: var(--surface-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.dday-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.dday-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.dday-title-text,
+.dday-date {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dday-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* D-day 해제(×) 버튼 */
+.dday-remove {
+  flex-shrink: 0;
+  align-self: stretch;
+  width: 36px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+/* D-7 ~ D-DAY: 빨간색 강조 */
+.dday-item.urgent {
+  border-color: var(--sun);
+}
+
+.dday-item.urgent .dday-badge {
+  background: var(--sun-soft);
+  color: var(--sun);
+}
+
+/* 지난 일정: 회색 */
+.dday-item.passed .dday-badge,
+.dday-item.passed .dday-title {
+  color: var(--text-muted);
+}
+
+.dday-item.passed .marker {
+  opacity: 0.5;
+}
+
+.empty-text.small {
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+/* =========================================================
+   시간표
+   ========================================================= */
+.timetable-panel {
+  padding: 12px;
+}
+
+/* 수정 모드: 지금 바꿀 수 있는 상태라는 걸 테두리로 알려 줘요 */
+.timetable-panel.editing {
+  border-color: var(--accent);
+}
+
+.timetable-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.timetable-hint {
+  margin: 0 0 8px;
+}
+
+.timetable-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+.timetable {
+  width: 100%;
+  table-layout: fixed; /* 과목 이름이 길어도 표 폭이 깨지지 않게 칸 폭을 고정 */
+  border-collapse: collapse;
+  font-size: 0.72rem;
+}
+
+.timetable th,
+.timetable td {
+  padding: 0;
+  border: 1px solid var(--border);
+}
+
+.timetable thead th {
+  height: 24px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+/* 맨 왼쪽 '1교시' 칸 */
+.timetable .tt-period {
+  width: 42px;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* 오늘 요일: 머리 칸은 강조색으로 채우고, 그 열의 칸은 연한 배경 */
+.timetable thead th.tt-today-head {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+.timetable td.tt-today {
+  background-color: var(--today-soft);
+}
+
+/* 그 요일에 없는 교시: 회색 빗금 */
+.timetable td.tt-off {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent 0 4px,
+    var(--border) 4px 5px
+  );
+}
+
+/* 칸 하나 */
+.tt-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 32px;
+  padding: 1px 2px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* 과목 칸: 과목 색을 연하게 깔아요 (글자는 기본 글자색이라 잘 읽혀요).
+   투명하게 섞어서 오늘 요일의 연한 배경도 함께 비쳐 보여요. */
+.tt-cell.tt-filled {
+  background: color-mix(in srgb, var(--tt-color) var(--tt-tint), transparent);
+}
+
+/* 긴 이름: 두 줄까지 보여 주고 넘치면 … */
+.tt-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* 수정 모드의 칸은 누를 수 있는 버튼 */
+button.tt-cell {
+  color: var(--text);
+  cursor: pointer;
+}
+
+button.tt-cell:not(.tt-filled) {
+  color: var(--text-muted);
+}
+
+button.tt-cell:hover {
+  box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+button.tt-cell:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+/* 백업 칸 */
+.backup-hint {
+  margin: 6px 0 12px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.backup-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.legend-heading {
+  margin: 16px 0 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.legend-heading:first-child {
+  margin-top: 0;
+}
+
+.legend-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+}
+
+.legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* =========================================================
+   끌어서 순서 바꾸기 손잡이 (⋮⋮)
+   ========================================================= */
+.drag-handle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: grab;
+  touch-action: none; /* 휴대폰에서 손잡이를 끌 때 화면이 같이 스크롤되지 않게 */
+}
+
+.drag-handle svg {
+  width: 10px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.drag-handle:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.drag-handle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* 순서를 바꿀 수 있는 줄: 들어올리고 내려놓을 때 크기·그림자가 부드럽게 변해요 */
+.subject-row,
+.day-event {
+  transition: scale 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* 끌고 있는 줄: 살짝 커지고 그림자가 생겨서 '들어올린' 것처럼 보여요 */
+li.dragging {
+  position: relative;
+  z-index: 5;
+  scale: 1.03;
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22), 0 2px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+li.dragging .drag-handle {
+  cursor: grabbing;
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .subject-row,
+  .day-event {
+    transition: none;
+  }
+}
+
+/* 끄는 동안에는 글자가 파랗게 선택되지 않게 */
+body.is-dragging {
+  cursor: grabbing;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* =========================================================
+   범례의 과목 줄: [손잡이] [색] [이름] [수정]
+   ========================================================= */
+.subject-list .subject-row {
+  gap: 6px;
+  /* 들어올렸을 때 그림자 안쪽에 여백이 보이도록 좌우를 살짝 넓혀 둠 */
+  margin: 0 -6px;
+  padding: 2px 6px;
+  border-radius: 10px;
+}
+
+.subject-name {
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subject-edit {
+  height: 26px;
+  padding: 0 8px;
+  font-size: 0.75rem;
+}
+
+.add-subject-btn {
+  width: 100%;
+  margin-top: 10px;
+}
+
+/* 과목 추가/수정 창의 색 고르기 */
+.color-options {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.color-swatch {
+  aspect-ratio: 1;
+  width: 100%;
+  max-width: 40px;
+  justify-self: center;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: var(--swatch);
+  background-clip: padding-box; /* 투명 테두리 밑으로 색이 비치지 않게 */
+}
+
+/* 고른 색: 바깥 테두리 + 색과 테두리 사이의 얇은 틈 */
+.color-swatch[aria-pressed="true"] {
+  border-color: var(--text);
+  box-shadow: inset 0 0 0 2px var(--surface);
+}
+
+.color-swatch:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.color-custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.color-custom input[type="color"] {
+  width: 36px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.danger-btn {
+  color: var(--sun);
+}
+
+/* 버튼 줄에서 왼쪽(삭제)과 오른쪽(취소·저장)을 떼어 놓는 빈 공간 */
+.spacer {
+  flex: 1;
+}
+
+/* 교시가 있는 수행평가: 과목 색 동그라미 안에 교시 숫자 */
+.marker-numbered {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 하루 일정 창·D-day 목록에서는 조금 더 크게 */
+.day-event .marker.marker-numbered:not(.marker-bar),
+.dday-title .marker.marker-numbered {
+  width: 18px;
+  height: 18px;
+  margin-inline: -1px; /* 막대(16px)와 글자 시작 위치를 맞춤 */
+  font-size: 0.7rem;
+}
+
+.dday-title .marker.marker-numbered {
+  margin-inline: 0;
+}
+
+/* 교시가 있는 시험: 막대 안 과목 이름 앞의 테두리 상자 숫자 (과목 이름과 헷갈리지 않게) */
+.bar-period {
+  display: inline-block;
+  min-width: 1.25em;
+  margin-right: 3px;
+  padding: 0 2px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 중간 폭에서는 일정 종류만 칸이 넉넉하면 2열로 펼쳐요.
+   과목 목록은 끌어서 순서를 바꾸는 계산이 위아래 한 줄 기준이라 항상 세로 한 줄이에요. */
+@media (min-width: 480px) and (max-width: 899px) {
+  #legendTypes {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+/* =========================================================
+   팝업 창 (일정 목록, 일정 추가/수정)
+   ========================================================= */
+.dialog {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.dialog-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+}
+
+/* 시간표 칸을 눌렀을 때 그 칸 근처에 뜨는 작은 선택 창 (위치는 app.js가 정해요) */
+.tt-picker {
+  position: fixed;
+  inset: auto;
+  width: 190px;
+  margin: 0;
+  overflow-y: auto;
+  border-radius: 12px;
+}
+
+.tt-picker::backdrop {
+  background: transparent; /* 뒤의 시간표가 그대로 보이게 */
+}
+
+.tt-picker-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px;
+}
+
+.tt-picker-title {
+  margin: 0 0 4px;
+  padding: 0 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.tt-picker-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tt-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 32px;
+  padding: 4px 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 0.85rem;
+  text-align: left;
+}
+
+.tt-option:hover:not(:disabled) {
+  background: var(--hover);
+}
+
+.tt-option:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.tt-option[aria-current="true"] {
+  font-weight: 700;
+}
+
+.tt-option:disabled {
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.tt-option-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.tt-add-form {
+  display: flex;
+  gap: 4px;
+  padding: 2px;
+}
+
+.tt-add-form input {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
+.tt-add-form input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.tt-picker .form-error {
+  padding: 0 6px;
+  font-size: 0.75rem;
+}
+
+/* 일정 목록 창: [‹ 화살표] [카드] [화살표 ›]
+   창 자체는 투명하게 두고, 가운데 카드만 판처럼 보이게 합니다. */
+.day-dialog {
+  width: min(560px, calc(100vw - 16px));
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.day-dialog[open] {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.day-card {
+  flex: 1;
+  min-width: 0;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.day-nav {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.dialog-holiday {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: var(--sun);
+}
+
+.empty-text {
+  margin: 4px 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* 하루 일정 목록 */
+.day-event-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.day-event {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.day-event-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.day-event-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.day-event-title {
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+
+.day-event-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* 정기고사의 그날 시험: 1교시 문학 */
+.day-event-slots {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.day-event-slot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.day-event-slot .marker {
+  width: 10px;
+  height: 10px;
+}
+
+/* 일정 아래의 메모: 줄바꿈은 그대로 보여 줘요 */
+.day-event-memo {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: var(--text);
+  opacity: 0.8; /* 일정 이름보다 살짝 흐리되, 시험 범위 같은 내용을 읽기 편하게 */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* 접힌 메모: 3줄까지만 */
+.day-event-memo.collapsed {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
+}
+
+.memo-toggle {
+  margin-top: 2px;
+  padding: 2px 0;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.memo-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* 삭제 되돌리기 알림: 화면 아래 가운데. 바탕과 글자색을 뒤집어 라이트/다크 모두 눈에 띄어요 */
+.undo-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 20px;
+  z-index: 20;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: var(--text);
+  color: var(--surface);
+  font-size: 0.9rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.undo-btn {
+  flex-shrink: 0;
+  padding: 2px 4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.undo-btn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+/* 입력 칸 */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  min-width: 0;
+}
+
+.field-label {
+  padding: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.field input[type="date"],
+.field input[type="text"],
+.field select {
+  height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.field textarea {
+  min-height: 72px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+  resize: vertical; /* 메모가 길면 아래로 늘려서 볼 수 있어요 */
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+/* '기간' 켜기 */
+.check-field {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.check-field input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.field-note {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* 반복: 안 함/매주/매월 3칸, 요일 7칸 */
+#repeatField {
+  gap: 8px;
+}
+
+.type-options.repeat-freq {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.repeat-freq .type-option {
+  justify-content: center;
+  padding: 0 4px;
+  font-size: 0.85rem;
+}
+
+.weekday-options {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.weekday-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.weekday-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.weekday-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.weekday-option:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 반복 일정 수정·삭제 범위 고르는 창 */
+.scope-dialog {
+  width: min(320px, calc(100vw - 32px));
+}
+
+.scope-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scope-cancel {
+  color: var(--text-muted);
+}
+
+/* 정기고사 시험 시간표 입력: 날짜 한 줄에 교시 3칸. 길어지면 이 안에서 스크롤 */
+.exam-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.exam-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px 6px;
+}
+
+.exam-row-date {
+  grid-column: 1 / -1;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.exam-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.field .exam-slot select {
+  width: 100%;
+  height: 32px;
+  padding: 0 4px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+}
+
+/* 종류 고르기: 네 개의 버튼처럼 보이는 라디오 */
+.type-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.type-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  position: relative;
+}
+
+.type-option input {
+  /* 동그란 라디오 버튼은 숨기고, 테두리 색으로 선택 상태를 보여 줘요 */
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.type-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--hover);
+  font-weight: 600;
+}
+
+.type-option:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.form-error {
+  margin: 0;
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  color: var(--sun);
+}
+
+.form-error:empty {
+  display: none;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* =========================================================
+   반응형: 휴대폰 화면
+   ========================================================= */
+@media (max-width: 600px) {
+  .app {
+    padding: 12px 16px 32px;
+  }
+
+  .calendar-panel {
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .cal-header {
+    gap: 4px;
+  }
+
+  .month-nav,
+  .cal-actions {
+    gap: 4px;
+  }
+
+  .month-title {
+    font-size: 1.05rem;
+  }
+
+  .today-date {
+    font-size: 1.05rem; /* 연월과 같은 크기 */
+  }
+
+  .week {
+    --day-top-h: 27px;
+    --item-gap: 3px;
+  }
+
+  .day {
+    min-height: 64px;
+    padding: 3px;
+  }
+
+  .event-chip.band,
+  .event-chip.exam-bar {
+    padding: 0 3px;
+  }
+
+  .event-chip.band-daily {
+    padding: 0;
+  }
+
+  .band-slot-first {
+    padding-left: 3px;
+  }
+
+  .day-number {
+    min-width: 22px;
+    height: 22px;
+    font-size: 0.75rem;
+  }
+
+  .day-top {
+    gap: 1px;
+  }
+
+  .holiday-name {
+    font-size: 0.55rem;
+  }
+
+  .day-dialog[open] {
+    gap: 6px;
+  }
+
+  .day-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1.3rem;
+  }
+
+  /* 휴대폰에서는 칸이 좁아서 일정 글자를 작게, 모양도 작게 */
+  .event-chip {
+    gap: 2px;
+    padding: 0;
+    font-size: 0.6rem;
+  }
+
+  .event-chip.shape-bar {
+    padding: 0 3px;
+    border-radius: 3px;
+  }
+
+  .event-chip .marker {
+    width: 6px;
+    height: 6px;
+  }
+
+  .event-chip .marker-ring {
+    border-width: 1.5px;
+  }
+
+  .event-memo-icon svg {
+    width: 8px;
+    height: 8px;
+  }
+
+  /* 교시 숫자 동그라미는 숫자가 보일 만큼은 크게 */
+  .event-chip .marker.marker-numbered {
+    width: 11px;
+    height: 11px;
+    font-size: 0.5rem;
+  }
+
+  /* 시험 교시 상자도 좁은 칸에 맞게 */
+  .bar-period {
+    margin-right: 2px;
+    padding: 0 1px;
+  }
+
+  .band .bar-period {
+    margin: 0 0 0 2px;
+  }
+
+  .band-slot:not(.band-slot-first) .bar-period {
+    margin: 0;
+  }
+
+  .more-events {
+    font-size: 0.6rem;
+    padding: 0;
+  }
+
+  .panel {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  /* 시간표는 좁은 화면에서 칸 폭을 조금이라도 더 쓰도록 여백과 글자를 줄여요 */
+  .timetable-panel {
+    padding: 10px;
+  }
+
+  .timetable {
+    font-size: 0.68rem;
+  }
+
+  .timetable .tt-period {
+    width: 36px;
+  }
+
+  .dialog-inner {
+    padding: 16px;
+  }
+
+  /* 휴대폰에서는 버튼(D-day/수정/삭제)을 내용 아래 줄로 내려서 글자 공간 확보 */
+  .day-event {
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+
+  .day-event-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
